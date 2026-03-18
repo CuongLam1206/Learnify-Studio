@@ -1,0 +1,45 @@
+# Learnify Agent — AI eLearning Platform
+
+# Environment
+.env
+.env.local
+.env.production
+.env.railway
+
+# Dependencies
+node_modules/
+.next/
+out/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+services/video-worker/.venv/
+
+# Generated
+prisma/generated/
+
+# Uploads / temp
+uploads/
+temp/
+*.mp4
+*.mp3
+*.wav
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Stable Diffusion model (lớn ~7GB, không commit)
+sd-model/
+*.safetensors
+*.ckpt
+.huggingface_cache/
+
+# SadTalker model weights (>100MB, không commit lên GitHub)
+services/sadtalker/gfpgan/weights/
+services/sadtalker/repo/checkpoints/
+services/sadtalker/repo/gfpgan/
+*.pth
+*.pth.tar

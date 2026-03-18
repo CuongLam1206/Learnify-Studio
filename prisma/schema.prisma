@@ -1,0 +1,90 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String       @id @default(cuid())
+  name      String
+  slug      String       @unique
+  logo      String?
+  createdAt DateTime     @default(now())
+  members   Instructor[]
+}
+
+model Instructor {
+  id             String        @id @default(cuid())
+  name           String
+  email          String        @unique
+  password       String
+  role           String        @default("teacher")  // "admin" | "teacher"
+  avatarPhotoUrl String?       // ảnh chân dung để HeyGen tạo Tier 1
+  voiceRefUrl    String?       // URL file audio clone giọng (15-30s)
+  heygenPhotoId  String?       // talking_photo_id từ HeyGen
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  videoJobs      VideoJob[]
+}
+
+model VideoJob {
+  id              String      @id @default(cuid())
+  instructorId    String
+  instructor      Instructor  @relation(fields: [instructorId], references: [id])
+  
+  // Input
+  title           String
+  subject         String
+  outline         String    
+  durationMinutes Int         @default(15)
+  tier            Int         @default(2)  // 1 = HeyGen Avatar, 2 = Slide+TTS, 3 = Animation
+  voiceId         String      @default("vi-VN-HoaiMyNeural")  // Edge TTS voice ID
+  slideTheme      String      @default("dark")  // dark | ocean | midnight | forest | sunset | light
+  
+  // Generated script
+  generatedScript Json?       // JSON: { title, sections: [{title, narration, slideContent, durationSeconds}] }
+  approvedScript  Json?       // Sau khi GV review & chỉnh
+  
+  // Processing
+  status          String      @default("draft")
+  // Status flow: draft → script_generated → approved → processing → done | failed
+  progress        Int         @default(0)
+  errorMessage    String?
+  
+  // HeyGen specific (Tier 1)
+  heygenVideoId   String?
+  
+  // Output
+  outputUrl       String?     // URL video cuối trên R2
+  thumbnailUrl    String?
+  quizData        Json?       // [{question, options: string[], answer: number, explanation}]
+  durationSeconds Int?
+  fileSizeMb      Float?
+  
+  // Cost tracking
+  costUsd         Float?
+  
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  slides          SlideAsset[]
+}
+
+model SlideAsset {
+  id              String    @id @default(cuid())
+  jobId           String
+  job             VideoJob  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  slideIndex      Int
+  narrationText   String  
+  slideContent    String  
+  imageUrl        String?   // rendered slide PNG
+  audioUrl        String?   // TTS audio for this slide
+  createdAt       DateTime  @default(now())
+}

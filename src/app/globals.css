@@ -1,0 +1,113 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #f1f5f9;
+    --surface-card: #ffffff;
+    --surface-border: #e2e8f0;
+    --surface-nav: #1e293b;
+    --brand-primary: #2563eb;
+    --accent-green: #16a34a;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--background);
+    color: #0f172a;
+    /* slate-900 — gần đen */
+    font-family: "Inter", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #f1f5f9;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #2563eb;
+    border-radius: 3px;
+  }
+}
+
+@layer components {
+
+  /* ── Card — trắng, shadow nhẹ ── */
+  .glass-card {
+    @apply bg-white border border-surface-border rounded-2xl shadow-card;
+  }
+
+  /* ── Primary button — Blue gradient ── */
+  .btn-primary {
+    @apply bg-gradient-to-r from-brand-700 to-brand-500 hover:from-brand-600 hover:to-brand-400 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100;
+  }
+
+  /* ── Secondary button ── */
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 border border-surface-border text-gray-700 hover:text-gray-900 font-medium px-5 py-2.5 rounded-xl transition-all duration-200 shadow-sm;
+  }
+
+  /* ── Ghost button ── */
+  .btn-ghost {
+    @apply text-gray-500 hover:text-gray-900 hover:bg-gray-100 px-4 py-2 rounded-lg transition-all;
+  }
+
+  /* ── Green CTA ── */
+  .btn-accent {
+    @apply bg-accent hover:bg-accent-dark text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-sm hover:shadow-md hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* ── Input ── */
+  .input-field {
+    @apply w-full bg-white border border-surface-border rounded-xl px-4 py-3 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:border-transparent transition-all shadow-sm;
+  }
+
+  /* ── Wizard step indicator ── */
+  .step-indicator {
+    @apply flex items-center justify-center w-8 h-8 rounded-full text-sm font-semibold;
+  }
+
+  /* ── Tier card ── */
+  .tier-card {
+    @apply glass-card p-5 cursor-pointer transition-all duration-200 hover:border-brand-300 hover:shadow-md;
+  }
+
+  .tier-card.selected {
+    @apply border-brand-500 bg-brand-50;
+  }
+
+  /* ── Status badge ── */
+  .status-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium;
+  }
+}
+
+@layer utilities {
+
+  /* Blue gradient text */
+  .text-gradient {
+    @apply bg-gradient-to-r from-brand-700 to-brand-400 bg-clip-text text-transparent;
+  }
+
+  .glow-sm {
+    box-shadow: 0 0 20px rgba(37, 99, 235, 0.15);
+  }
+
+  .glow-md {
+    box-shadow: 0 0 40px rgba(37, 99, 235, 0.25);
+  }
+}
