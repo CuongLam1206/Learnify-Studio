@@ -31,6 +31,7 @@ from gtts import gTTS
 import httpx
 from fastapi import FastAPI, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from playwright.sync_api import sync_playwright
 from pydantic import BaseModel
 
@@ -46,7 +47,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Serve video files từ public/videos qua ngrok
+_VIDEOS_DIR = Path(__file__).parent.parent.parent / "public" / "videos"
+_VIDEOS_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/videos", StaticFiles(directory=str(_VIDEOS_DIR)), name="videos")
+
 NEXT_API = os.getenv("NEXT_PUBLIC_APP_URL", "http://localhost:3000")
+# URL public của worker (ngrok URL) — dùng để generate outputUrl cho video
+WORKER_PUBLIC_URL = os.getenv("WORKER_PUBLIC_URL", "http://localhost:8000")
 HEYGEN_API_KEY = os.getenv("HEYGEN_API_KEY", "")
 HEYGEN_API = "https://api.heygen.com"
 HEYGEN_DEFAULT_AVATAR = os.getenv("HEYGEN_DEFAULT_AVATAR", "Angela-inblackskirt-20220820")
@@ -326,7 +334,7 @@ async def run_sadtalker_pipeline(req: ProcessRequest):
             vtt_path = srt_path.with_suffix(".vtt")
             srt_to_vtt(srt_path, vtt_path)
             shutil.copy2(vtt_path, public_dir / f"{job_id}.vtt")
-        output_url = f"{NEXT_API}/videos/{job_id}.mp4"
+        output_url = f"{WORKER_PUBLIC_URL}/videos/{job_id}.mp4"
 
         await update_job(job_id, {
             "status": "done",
@@ -459,7 +467,7 @@ async def run_tier2_pipeline(req: ProcessRequest):
             srt_to_vtt(srt_path, vtt_path)
             shutil.copy2(vtt_path, public_dir / f"{job_id}.vtt")
 
-        video_url = f"{NEXT_API}/videos/{job_id}.mp4"
+        video_url = f"{WORKER_PUBLIC_URL}/videos/{job_id}.mp4"
         file_size_mb = round(dest.stat().st_size / 1024 / 1024, 1)
 
         await update_job(job_id, {
@@ -485,35 +493,56 @@ async def run_tier2_pipeline(req: ProcessRequest):
 
 
 def generate_gemini_image_sync(keyword: str) -> str:
-    """Tạo ảnh AI từ Gemini. Thử nhiều config, trả về base64 data URL hoặc ''."""
+    """Tạo ảnh AI từ Gemini/Imagen. Trả về base64 data URL hoặc ''."""
     api_key = os.getenv("GEMINI_API_KEY", "")
     if not api_key or not keyword:
         return ""
     print(f"  Gemini key=...{api_key[-6:]} | '{keyword[:30]}'")
 
-    # English-only prompt — STRICTLY photorealistic, NO cartoon/illustration
     prompt = (
         f"A stunning photorealistic image about: {keyword}. "
-        "Shot with a professional DSLR camera, realistic photo style like stock photography. "
-        "Cinematic lighting, shallow depth of field, high detail, 8K quality. "
-        "STRICTLY FORBIDDEN: cartoon, illustration, flat design, clip art, vector art, "
-        "infographic, icon style, anime, comic, drawing, sketch, hand-drawn. "
-        "No text, no words, no labels, no watermarks."
+        "Professional DSLR camera, realistic stock photo style. "
+        "Cinematic lighting, high detail. No text, no watermarks."
     )
-    configs = [
-        # gemini-2.0-flash-exp + TEXT+IMAGE — đang hoạt động
-        ("v1beta", "gemini-2.0-flash-exp",                  ["TEXT", "IMAGE"]),
-        # Fallback: image-generation model — nếu future access
-        ("v1beta", "gemini-2.0-flash-exp-image-generation", ["TEXT", "IMAGE"]),
-    ]
-    for api_ver, model, modalities in configs:
+
+    # ── Bước 1: Thử Imagen 3 (paid API, predict endpoint) ─────────────────
+    for imagen_model in ["imagen-3.0-generate-002", "imagen-3.0-fast-generate-001"]:
+        try:
+            resp = httpx.post(
+                f"https://generativelanguage.googleapis.com/v1beta/models/{imagen_model}:predict",
+                headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
+                json={
+                    "instances": [{"prompt": prompt}],
+                    "parameters": {"sampleCount": 1, "aspectRatio": "16:9"},
+                },
+                timeout=40.0,
+            )
+            if resp.status_code == 200:
+                preds = resp.json().get("predictions", [])
+                if preds:
+                    b64 = preds[0].get("bytesBase64Encoded", "")
+                    mime = preds[0].get("mimeType", "image/png")
+                    if b64:
+                        print(f"  Imagen [{imagen_model}] image OK!")
+                        return f"data:{mime};base64,{b64}"
+            else:
+                err = resp.json().get("error", {}).get("message", resp.text[:80])
+                print(f"  Imagen [{imagen_model}] {resp.status_code}: {err}")
+        except Exception as e:
+            print(f"  Imagen [{imagen_model}] error: {e}")
+
+    # ── Bước 2: Fallback Gemini generateContent models ─────────────────────
+    for api_ver, model in [
+        ("v1beta", "gemini-2.0-flash-preview-image-generation"),
+        ("v1beta", "gemini-2.0-flash-exp-image-generation"),
+    ]:
         try:
             resp = httpx.post(
                 f"https://generativelanguage.googleapis.com/{api_ver}/models/{model}:generateContent",
                 headers={"x-goog-api-key": api_key, "Content-Type": "application/json"},
                 json={
                     "contents": [{"parts": [{"text": prompt}]}],
-                    "generationConfig": {"responseModalities": modalities},
+                    "generationConfig": {"responseModalities": ["TEXT", "IMAGE"]},
                 },
                 timeout=40.0,
             )
@@ -528,15 +557,17 @@ def generate_gemini_image_sync(keyword: str) -> str:
                     b64 = part.get("inlineData", {}).get("data", "")
                     mime = part.get("inlineData", {}).get("mimeType", "image/png")
                     if b64:
-                        print(f"  Gemini [{api_ver}/{model[:20]}] image OK!")
+                        print(f"  Gemini [{model}] image OK!")
                         return f"data:{mime};base64,{b64}"
-                print(f"  Gemini [{api_ver}/{model[:20]}] 200 but no image")
             else:
                 err = resp.json().get("error", {}).get("message", resp.text[:60])
-                print(f"  Gemini [{api_ver}/{model[:20]}] {resp.status_code}: {err}")
+                print(f"  Gemini [{model}] {resp.status_code}: {err}")
         except Exception as e:
-            print(f"  Gemini [{api_ver}/{model[:20]}] error: {e}")
+            print(f"  Gemini [{model}] error: {e}")
+
     return ""
+
+
 
 
 
