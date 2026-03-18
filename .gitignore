@@ -43,3 +43,4 @@ services/sadtalker/repo/checkpoints/
 services/sadtalker/repo/gfpgan/
 *.pth
 *.pth.tar
+services/sadtalker/ 
