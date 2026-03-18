@@ -138,7 +138,7 @@ export default function JobDetailPage() {
                             <div className="glass-card overflow-hidden">
                                 <video
                                     ref={videoRef}
-                                    src={job.outputUrl}
+                                    src={job.outputUrl.includes("ngrok") ? `${job.outputUrl}?ngrok-skip-browser-warning=true` : job.outputUrl}
                                     controls
                                     crossOrigin="anonymous"
                                     className="w-full rounded-2xl aspect-video bg-black"
