@@ -54,7 +54,6 @@ export function getTierLabel(tier: number): string {
     switch (tier) {
         case 1: return "🔴 Tier 1 — Avatar AI";
         case 2: return "🟡 Tier 2 — Slide + Voice";
-        case 3: return "🟢 Tier 3 — Animation";
         default: return "Tier " + tier;
     }
 }
@@ -63,7 +62,6 @@ export function getTierCostEstimate(tier: number, durationMin: number): string {
     switch (tier) {
         case 1: return `~$${(durationMin * 0.6).toFixed(0)}–$${(durationMin * 0.9).toFixed(0)}`;
         case 2: return "$0 — Gemini AI + gTTS miễn phí";
-        case 3: return "~$0 (miễn phí)";
         default: return "N/A";
     }
 }

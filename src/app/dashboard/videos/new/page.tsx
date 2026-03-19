@@ -63,17 +63,6 @@ const TIERS = [
         color: "yellow",
         recommended: true,
     },
-    {
-        id: 3,
-        emoji: "🟢",
-        name: "Tier 3 — Animation",
-        desc: "Text animation và đồ thị động. Miễn phí hoàn toàn.",
-        bestFor: "Tóm tắt, ôn tập cuối bài",
-        pros: ["Hoàn toàn miễn phí", "Phù hợp môn Toán/KH", "Render nhanh"],
-        cons: ["Không có giọng/mặt GV", "Đơn giản hơn"],
-        tech: "HTML5 Animation",
-        color: "green",
-    },
 ];
 
 // ─── Upload Zone Component ───────────────────────────────────────────────────────────
@@ -764,8 +753,7 @@ function StepTier({
             </div>
 
             {/* Voice Picker — Tier 1 & 2 */}
-            {selectedTier !== 3 && (
-                <div className="glass-card p-5 space-y-3">
+            <div className="glass-card p-5 space-y-3">
                     <p className="text-sm font-semibold text-gray-900">🎤 Chọn giọng đọc</p>
                     <div className="grid grid-cols-3 gap-2">
                         {VOICES.map((v) => (
@@ -783,11 +771,7 @@ function StepTier({
                         ))}
                     </div>
                 </div>
-            )}
-
-            {/* Theme Picker — Tier 1 & 2 */}
-            {selectedTier !== 3 && (
-                <div className="glass-card p-5 space-y-3">
+            <div className="glass-card p-5 space-y-3">
                     <p className="text-sm font-semibold text-gray-900">🎨 Chọn theme màu slide</p>
                     <div className="grid grid-cols-6 gap-2">
                         {THEMES.map((t) => (
@@ -806,9 +790,9 @@ function StepTier({
                         ))}
                     </div>
                 </div>
-            )}
 
             {/* Tier 1: Instructor photo + Avatar intro text */}
+
             {selectedTier === 1 && (
                 <div className="glass-card p-5 space-y-4">
                     <p className="text-sm font-semibold text-gray-900">👤 Thiết lập Avatar Giảng Viên</p>
