@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="flex flex-col min-h-screen bg-surface">
             {/* Top Navigation Bar */}
-            <header className="flex-shrink-0 bg-[#0f172a] sticky top-0 z-50 shadow-md">
+            <header className="flex-shrink-0 bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
                 <div className="flex items-center gap-6 px-6 h-14">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0 mr-4">
@@ -43,16 +43,16 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             <BrainCircuit className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                            <span className="font-bold text-white text-base leading-none tracking-tight">
+                            <span className="font-bold text-slate-800 text-base leading-none tracking-tight">
                                 Learnify
                             </span>
-                            <p className="text-[10px] text-brand-300 leading-none mt-0.5 font-medium">
+                            <p className="text-[10px] text-brand-500 leading-none mt-0.5 font-medium">
                                 AI Video Studio
                             </p>
                         </div>
                     </Link>
 
-                    <div className="h-5 w-px bg-white/10 flex-shrink-0" />
+                    <div className="h-5 w-px bg-slate-200 flex-shrink-0" />
 
                     {/* Nav */}
                     <nav className="flex items-center gap-1">
@@ -63,8 +63,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                     className={cn(
                                         "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200",
                                         active
-                                            ? "bg-brand-500/20 text-brand-300 border border-brand-400/30"
-                                            : "text-slate-300 hover:text-white hover:bg-white/8"
+                                            ? "bg-brand-50 text-brand-600 border border-brand-200"
+                                            : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                                     )}
                                 >
                                     <Icon className="w-4 h-4 flex-shrink-0" />
@@ -74,10 +74,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                         })}
 
                         {/* AI Copilot — soon */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-slate-500 cursor-not-allowed ml-2">
+                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-slate-400 cursor-not-allowed ml-2">
                             <BookOpen className="w-4 h-4 flex-shrink-0" />
                             AI Copilot
-                            <span className="text-[10px] bg-slate-700 text-slate-400 px-1.5 py-0.5 rounded-full">Soon</span>
+                            <span className="text-[10px] bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-full">Soon</span>
                         </div>
 
                         {/* Admin — chỉ hiện cho role admin */}
@@ -86,8 +86,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                                 className={cn(
                                     "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200",
                                     pathname === "/dashboard/admin"
-                                        ? "bg-purple-500/20 text-purple-300 border border-purple-400/30"
-                                        : "text-slate-300 hover:text-white hover:bg-white/8"
+                                        ? "bg-purple-50 text-purple-600 border border-purple-200"
+                                        : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                                 )}
                             >
                                 <Building2 className="w-4 h-4 flex-shrink-0" />
@@ -99,20 +99,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     {/* User + Logout */}
                     <div className="ml-auto flex items-center gap-3">
                         <div className="hidden sm:block text-right">
-                            <p className="text-xs font-medium text-white leading-none">{userName}</p>
-                            <p className="text-[10px] text-slate-400 leading-none mt-0.5 truncate max-w-[140px]">
+                            <p className="text-xs font-medium text-slate-800 leading-none">{userName}</p>
+                            <p className="text-[10px] text-slate-500 leading-none mt-0.5 truncate max-w-[140px]">
                                 {orgName ? `${orgName} · ${userRole === 'admin' ? 'Admin' : 'GV'}` : userEmail}
                             </p>
                         </div>
-                        <div className="w-7 h-7 rounded-full bg-brand-500/20 border border-brand-400/30 flex items-center justify-center">
-                            <User className="w-3.5 h-3.5 text-brand-300" />
+                        <div className="w-7 h-7 rounded-full bg-brand-50 border border-brand-200 flex items-center justify-center">
+                            <User className="w-3.5 h-3.5 text-brand-500" />
                         </div>
 
                         {/* Logout button */}
                         <button
                             onClick={handleLogout}
                             title="Đăng xuất"
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-slate-300 hover:text-white hover:bg-red-500/15 border border-transparent hover:border-red-500/20 transition-all duration-200"
+                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-slate-600 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition-all duration-200"
                         >
                             <LogOut className="w-4 h-4" />
                             <span className="hidden md:inline">Đăng xuất</span>
@@ -120,6 +120,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     </div>
                 </div>
             </header>
+
 
             <main className="flex-1 overflow-y-auto p-8">{children}</main>
         </div>
