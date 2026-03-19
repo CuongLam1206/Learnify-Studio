@@ -35,7 +35,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return (
         <div className="flex flex-col min-h-screen bg-surface">
             {/* Top Navigation Bar */}
-            <header className="flex-shrink-0 bg-[#1e293b] sticky top-0 z-50 shadow-md">
+            <header className="flex-shrink-0 bg-[#0f172a] sticky top-0 z-50 shadow-md">
                 <div className="flex items-center gap-6 px-6 h-14">
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2.5 group flex-shrink-0 mr-4">
