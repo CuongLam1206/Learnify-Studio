@@ -20,39 +20,79 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ success: false, error: "Job not found" }, { status: 404 });
         }
 
-        // Tier 2 dùng edge-tts (không cần key) — chỉ cần Python worker chạy
-        // Tier 1 cần HEYGEN_API_KEY
+        const scriptToSend = script_override ?? job.approvedScript;
+
+        // ── Option 1: RunPod Serverless ──────────────────────────────────────
+        const runpodApiKey   = process.env.RUNPOD_API_KEY ?? "";
+        const runpodEndpoint = process.env.RUNPOD_ENDPOINT_ID ?? "";
+
+        if (runpodApiKey && runpodEndpoint) {
+            try {
+                const res = await fetch(
+                    `https://api.runpod.ai/v2/${runpodEndpoint}/run`,
+                    {
+                        method : "POST",
+                        headers: {
+                            "Content-Type" : "application/json",
+                            "Authorization": `Bearer ${runpodApiKey}`,
+                        },
+                        body: JSON.stringify({
+                            input: {
+                                job_id          : jobId,
+                                tier,
+                                script          : scriptToSend,
+                                instructor      : {
+                                    voice_ref_url  : job.instructor.voiceRefUrl,
+                                    photo_base64   : instructor_photo_base64 ?? "",
+                                },
+                                duration_minutes: job.durationMinutes,
+                                voice_id        : job.voiceId ?? "vi-VN-HoaiMyNeural",
+                                slide_theme     : job.slideTheme ?? "dark",
+                                image_engine    : (scriptToSend as { imageEngine?: string })?.imageEngine ?? "gemini",
+                                avatar_intro    : avatar_intro ?? "",
+                                subtitle        : subtitle ?? true,
+                                // Vercel callback URL để worker update status
+                                next_api_url    : process.env.NEXTAUTH_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "",
+                            },
+                        }),
+                        signal: AbortSignal.timeout(10_000),
+                    }
+                );
+
+                if (res.ok) {
+                    const data = await res.json();
+                    console.log(`[RunPod] Job ${jobId} queued: ${data.id}`);
+                    return NextResponse.json({ success: true, message: "RunPod processing", runpodJobId: data.id });
+                }
+            } catch (err) {
+                console.error("[RunPod] Failed to queue job:", err);
+            }
+        }
+
+        // ── Option 2: Fallback — Local worker HTTP ───────────────────────────
         const workerUrl = process.env.PYTHON_WORKER_URL ?? "http://localhost:8000";
         let useDemo = true;
 
-        // Dùng script_override (có customImageBase64) nếu client gửi lên
-        // Fallback về job.approvedScript từ DB (không có ảnh)
-        const scriptToSend = script_override ?? job.approvedScript;
-
         try {
-            // Kiểm tra worker có running không (health check)
-            const health = await fetch(`${workerUrl}/health`, {
-                signal: AbortSignal.timeout(2000),
-            });
+            const health = await fetch(`${workerUrl}/health`, { signal: AbortSignal.timeout(2000) });
             if (health.ok && (tier === 2 || (tier === 1 && instructor_photo_base64))) {
-                // Worker online + có thể xử lý tier này → gọi process
                 const res = await fetch(`${workerUrl}/process`, {
-                    method: "POST",
+                    method : "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        job_id: jobId,
+                    body   : JSON.stringify({
+                        job_id          : jobId,
                         tier,
-                        script: scriptToSend,
-                        instructor: {
+                        script          : scriptToSend,
+                        instructor      : {
                             voice_ref_url: job.instructor.voiceRefUrl,
-                            photo_base64: instructor_photo_base64 ?? "",  // Tier 1 SadTalker
+                            photo_base64 : instructor_photo_base64 ?? "",
                         },
                         duration_minutes: job.durationMinutes,
-                        voice_id: job.voiceId ?? "vi-VN-HoaiMyNeural",
-                        slide_theme: job.slideTheme ?? "dark",
-                        image_engine: (scriptToSend as { imageEngine?: string })?.imageEngine ?? "gemini",
-                        avatar_intro: avatar_intro ?? "",
-                        subtitle: subtitle ?? true,
+                        voice_id        : job.voiceId ?? "vi-VN-HoaiMyNeural",
+                        slide_theme     : job.slideTheme ?? "dark",
+                        image_engine    : (scriptToSend as { imageEngine?: string })?.imageEngine ?? "gemini",
+                        avatar_intro    : avatar_intro ?? "",
+                        subtitle        : subtitle ?? true,
                     }),
                     signal: AbortSignal.timeout(5000),
                 });
@@ -62,10 +102,7 @@ export async function POST(req: NextRequest) {
             console.log(`Tier ${tier}: worker unavailable — using demo simulation`);
         }
 
-
-
         if (useDemo) {
-            // Chạy demo simulation trong background (không await)
             simulateDemoProgress(jobId, tier).catch(console.error);
         }
 

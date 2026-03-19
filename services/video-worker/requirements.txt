@@ -9,11 +9,16 @@ gtts==2.5.3
 aiofiles==24.1.0
 edge-tts==7.0.2
 
-# Stable Diffusion (optional — chỉ cần nếu dùng SD engine)
+# RunPod Serverless SDK
+runpod>=1.6.0
+
+# Cloudflare R2 upload (S3-compatible)
+boto3>=1.34.0
+
+# SadTalker / Stable Diffusion deps
 torch>=2.1.0
 torchvision>=0.16.0
 diffusers>=0.27.0
 transformers>=4.38.0
 accelerate>=0.27.0
 huggingface_hub>=0.21.0
-# xformers>=0.0.24  # optional: uncomment nếu có NVIDIA GPU, tăng tốc đáng kể

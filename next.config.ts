@@ -3,9 +3,10 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      { hostname: "*.r2.cloudflarestorage.com" },
+      { hostname: "*.r2.cloudflarestorage.com" },  // R2 private
+      { hostname: "*.r2.dev" },                      // R2 public domain
+      { hostname: "pub-*.r2.dev" },                  // R2 public bucket URL
       { hostname: "*.cloudflare.com" },
-      { hostname: "*.railway.app" },
       { hostname: "*.ngrok-free.app" },
       { hostname: "*.loca.lt" },
     ],

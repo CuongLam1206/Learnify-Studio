@@ -17,6 +17,14 @@ import traceback
 from pathlib import Path
 from typing import Any
 
+# R2 upload (optional — chỉ dùng nếu env R2_ACCOUNT_ID được set)
+try:
+    from r2_upload import upload_video_and_subtitle as _r2_upload
+    _HAS_R2 = True
+except ImportError:
+    _HAS_R2 = False
+    _r2_upload = None
+
 # FFmpeg full build (có libass cho subtitle filter)
 _FFMPEG_FULL = Path(r"C:\Users\admin\Downloads\ffmpeg-8.0.1-full_build\ffmpeg-8.0.1-full_build\bin\ffmpeg.exe")
 FFMPEG = str(_FFMPEG_FULL) if _FFMPEG_FULL.exists() else "ffmpeg"
@@ -141,6 +149,33 @@ async def update_job(job_id: str, data: dict):
             )
         except Exception as e:
             print(f"[update_job] Error: {e}")
+
+
+async def _upload_video(job_id: str, video_path: Path, vtt_path: Path | None) -> str:
+    """
+    Upload video lên Cloudflare R2 (nếu setup) hoặc serve qua WORKER_PUBLIC_URL.
+    Returns: public URL của video.
+    """
+    # ── Option 1: Upload lên R2 ───────────────────────────────────────────────
+    if _HAS_R2 and os.getenv("R2_ACCOUNT_ID"):
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+            video_url, _ = await loop.run_in_executor(
+                None, lambda: _r2_upload(job_id, video_path, vtt_path)
+            )
+            return video_url
+        except Exception as e:
+            print(f"  [R2] Upload failed, fallback to local: {e}")
+
+    # ── Option 2: Fallback — copy vào public/videos/ và serve qua WORKER_PUBLIC_URL ──
+    public_dir = Path(__file__).parent.parent.parent / "public" / "videos"
+    public_dir.mkdir(parents=True, exist_ok=True)
+    dest = public_dir / f"{job_id}.mp4"
+    shutil.copy2(video_path, dest)
+    if vtt_path and vtt_path.exists():
+        shutil.copy2(vtt_path, public_dir / f"{job_id}.vtt")
+    return f"{WORKER_PUBLIC_URL}/videos/{job_id}.mp4"
 
 
 async def run_pipeline(req: ProcessRequest):
@@ -333,8 +368,11 @@ async def run_sadtalker_pipeline(req: ProcessRequest):
         if srt_path and srt_path.exists():
             vtt_path = srt_path.with_suffix(".vtt")
             srt_to_vtt(srt_path, vtt_path)
-            shutil.copy2(vtt_path, public_dir / f"{job_id}.vtt")
-        output_url = f"{WORKER_PUBLIC_URL}/videos/{job_id}.mp4"
+        else:
+            vtt_path = None
+
+        # Upload R2 nếu có, fallback về ngrok/local
+        output_url = await _upload_video(job_id, output_mp4, vtt_path)
 
         await update_job(job_id, {
             "status": "done",
@@ -465,9 +503,11 @@ async def run_tier2_pipeline(req: ProcessRequest):
         if srt_path and srt_path.exists():
             vtt_path = srt_path.with_suffix(".vtt")
             srt_to_vtt(srt_path, vtt_path)
-            shutil.copy2(vtt_path, public_dir / f"{job_id}.vtt")
+        else:
+            vtt_path = None
 
-        video_url = f"{WORKER_PUBLIC_URL}/videos/{job_id}.mp4"
+        # Upload R2 nếu có, fallback về ngrok/local
+        video_url = await _upload_video(job_id, output_path, vtt_path)
         file_size_mb = round(dest.stat().st_size / 1024 / 1024, 1)
 
         await update_job(job_id, {
