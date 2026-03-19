@@ -1,0 +1,434 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:03.780
+Chào mừng các bạn đến với bài học đầu tiên về lập trình Python!
+
+2
+00:00:03.780 --> 00:00:07.020
+Trong khoảng thời gian ngắn ngủi này. chúng ta sẽ cùng nhau
+
+3
+00:00:07.020 --> 00:00:10.260
+khám phá những điều cơ bản nhất về Python. một ngôn ngữ
+
+4
+00:00:10.260 --> 00:00:12.690
+lập trình vô cùng mạnh mẽ và phổ biến.
+
+5
+00:00:12.690 --> 00:00:15.930
+Python không chỉ dễ học mà còn được ứng dụng rộng rãi
+
+6
+00:00:15.930 --> 00:00:19.171
+trong nhiều lĩnh vực khác nhau. từ phát triển web. khoa học
+
+7
+00:00:19.171 --> 00:00:22.411
+dữ liệu. trí tuệ nhân tạo cho đến tự động hóa các
+
+8
+00:00:22.411 --> 00:00:23.491
+tác vụ hàng ngày.
+
+9
+00:00:23.491 --> 00:00:24.571
+Vậy Python là gì?
+
+10
+00:00:24.571 --> 00:00:27.811
+Python là một ngôn ngữ lập trình bậc cao. có nghĩa là
+
+11
+00:00:27.811 --> 00:00:31.051
+nó gần gũi với ngôn ngữ con người hơn so với ngôn
+
+12
+00:00:31.051 --> 00:00:31.861
+ngữ máy tính.
+
+13
+00:00:31.861 --> 00:00:35.102
+Nó được thiết kế với cú pháp rõ ràng. dễ đọc. giúp
+
+14
+00:00:35.102 --> 00:00:38.342
+cho việc viết và bảo trì mã trở nên đơn giản hơn
+
+15
+00:00:38.342 --> 00:00:39.152
+bao giờ hết.
+
+16
+00:00:39.152 --> 00:00:42.392
+Python cũng là một ngôn ngữ thông dịch. tức là mã của
+
+17
+00:00:42.392 --> 00:00:45.632
+bạn sẽ được thực thi trực tiếp mà không cần phải biên
+
+18
+00:00:45.632 --> 00:00:46.172
+dịch trước.
+
+19
+00:00:46.172 --> 00:00:50.223
+Điều này giúp quá trình phát triển trở nên nhanh chóng và linh hoạt hơn.
+
+20
+00:00:50.223 --> 00:00:53.463
+Một trong những điểm mạnh lớn nhất của Python là cộng đồng
+
+21
+00:00:53.463 --> 00:00:56.703
+người dùng đông đảo và sự hỗ trợ mạnh mẽ từ các
+
+22
+00:00:56.703 --> 00:00:57.783
+thư viện và framework.
+
+23
+00:00:57.783 --> 00:01:01.023
+Có vô số thư viện Python được phát triển để phục vụ
+
+24
+00:01:01.023 --> 00:01:04.263
+cho mọi mục đích. từ xử lý dữ liệu với Pandas và
+
+25
+00:01:04.263 --> 00:01:07.504
+NumPy. xây dựng ứng dụng web với Django và Flask. đến phát
+
+26
+00:01:07.504 --> 00:01:10.204
+triển các mô hình học máy với Scikit-learn và TensorFlow.
+
+27
+00:01:10.204 --> 00:01:13.444
+Sự phong phú này giúp bạn tiết kiệm rất nhiều thời gian
+
+28
+00:01:13.444 --> 00:01:16.414
+và công sức khi giải quyết các vấn đề phức tạp.
+
+29
+00:01:16.414 --> 00:01:19.654
+Trong bài học này. chúng ta sẽ bắt đầu với những khái
+
+30
+00:01:19.654 --> 00:01:22.895
+niệm cơ bản nhất của Python. bao gồm biến. kiểu dữ liệu.
+
+31
+00:01:22.895 --> 00:01:25.325
+toán tử. câu lệnh điều kiện và vòng lặp.
+
+32
+00:01:25.325 --> 00:01:28.565
+Chúng ta cũng sẽ tìm hiểu cách viết và chạy một chương
+
+33
+00:01:28.565 --> 00:01:29.645
+trình Python đơn giản.
+
+34
+00:01:29.645 --> 00:01:32.885
+Mục tiêu của chúng ta là giúp bạn có một nền tảng
+
+35
+00:01:32.885 --> 00:01:36.125
+vững chắc để tiếp tục khám phá thế giới lập trình Python
+
+36
+00:01:36.125 --> 00:01:36.665
+rộng lớn.
+
+37
+00:01:36.665 --> 00:01:38.016
+Hãy cùng bắt đầu nào!
+
+38
+00:01:38.016 --> 00:01:41.582
+Bây giờ. chúng ta sẽ đi sâu hơn vào các khái niệm
+
+39
+00:01:41.582 --> 00:01:42.770
+cơ bản của Python.
+
+40
+00:01:42.770 --> 00:01:44.553
+Đầu tiên. hãy nói về biến.
+
+41
+00:01:44.553 --> 00:01:48.417
+Biến là một vùng nhớ được đặt tên để lưu trữ dữ liệu.
+
+42
+00:01:48.417 --> 00:01:51.983
+Trong Python. bạn không cần phải khai báo kiểu dữ liệu của
+
+43
+00:01:51.983 --> 00:01:53.469
+biến trước khi sử dụng.
+
+44
+00:01:53.469 --> 00:01:57.035
+Python sẽ tự động suy luận kiểu dữ liệu dựa trên giá
+
+45
+00:01:57.035 --> 00:01:58.521
+trị bạn gán cho biến.
+
+46
+00:01:58.521 --> 00:02:02.087
+Ví dụ. bạn có thể viết `x = 10` để gán giá
+
+47
+00:02:02.087 --> 00:02:05.653
+trị 10 cho biến `x`. và Python sẽ hiểu rằng `x` là
+
+48
+00:02:05.653 --> 00:02:06.544
+một số nguyên.
+
+49
+00:02:06.544 --> 00:02:10.111
+Tiếp theo. chúng ta sẽ tìm hiểu về các kiểu dữ liệu
+
+50
+00:02:10.111 --> 00:02:11.299
+cơ bản trong Python.
+
+51
+00:02:11.299 --> 00:02:14.865
+Có một số kiểu dữ liệu quan trọng mà bạn cần nắm
+
+52
+00:02:14.865 --> 00:02:18.431
+vững. bao gồm số nguyên (integer). số thực (float). chuỗi (string) và
+
+53
+00:02:18.431 --> 00:02:19.026
+boolean (True/False).
+
+54
+00:02:19.026 --> 00:02:22.592
+Số nguyên được sử dụng để biểu diễn các số không có
+
+55
+00:02:22.592 --> 00:02:26.158
+phần thập phân. ví dụ như 1. 2. 3. -1. -2. -3.
+
+56
+00:02:26.158 --> 00:02:29.724
+Số thực được sử dụng để biểu diễn các số có phần
+
+57
+00:02:29.724 --> 00:02:32.102
+thập phân. ví dụ như 3.14. 2.71. -0.5.
+
+58
+00:02:32.102 --> 00:02:35.668
+Chuỗi được sử dụng để biểu diễn văn bản. ví dụ như
+
+59
+00:02:35.668 --> 00:02:37.451
+"Hello. world!" hoặc "Python is awesome!".
+
+60
+00:02:37.451 --> 00:02:41.017
+Boolean được sử dụng để biểu diễn giá trị đúng hoặc sai.
+
+61
+00:02:41.017 --> 00:02:45.177
+Ngoài ra. chúng ta cũng cần làm quen với các toán tử trong Python.
+
+62
+00:02:45.177 --> 00:02:48.744
+Toán tử là các ký hiệu được sử dụng để thực hiện
+
+63
+00:02:48.744 --> 00:02:50.527
+các phép tính trên dữ liệu.
+
+64
+00:02:50.527 --> 00:02:54.093
+Python cung cấp nhiều loại toán tử khác nhau. bao gồm toán
+
+65
+00:02:54.093 --> 00:02:57.659
+tử số học (+. -. *. /. %). toán tử so sánh
+
+66
+00:02:57.659 --> 00:03:01.225
+(==. !=. >. <. >=. <=) và toán tử logic (and. or.
+
+67
+00:03:01.225 --> 00:03:01.522
+not).
+
+68
+00:03:01.522 --> 00:03:05.088
+Ví dụ. bạn có thể sử dụng toán tử + để cộng
+
+69
+00:03:05.088 --> 00:03:08.654
+hai số. toán tử == để so sánh hai giá trị có
+
+70
+00:03:08.654 --> 00:03:12.220
+bằng nhau hay không. và toán tử and để kết hợp hai
+
+71
+00:03:12.220 --> 00:03:13.112
+điều kiện logic.
+
+72
+00:03:13.112 --> 00:03:17.570
+Cuối cùng. chúng ta sẽ tìm hiểu về câu lệnh điều kiện và vòng lặp.
+
+73
+00:03:17.570 --> 00:03:21.136
+Câu lệnh điều kiện cho phép bạn thực thi một đoạn mã
+
+74
+00:03:21.136 --> 00:03:23.810
+chỉ khi một điều kiện nào đó là đúng.
+
+75
+00:03:23.810 --> 00:03:27.376
+Vòng lặp cho phép bạn thực thi một đoạn mã nhiều lần
+
+76
+00:03:27.376 --> 00:03:30.943
+cho đến khi một điều kiện nào đó không còn đúng nữa.
+
+77
+00:03:30.943 --> 00:03:34.509
+Hai cấu trúc điều khiển luồng này là vô cùng quan trọng
+
+78
+00:03:34.509 --> 00:03:38.075
+trong lập trình. cho phép bạn tạo ra các chương trình phức
+
+79
+00:03:38.075 --> 00:03:39.264
+tạp và linh hoạt.
+
+80
+00:03:39.264 --> 00:03:42.561
+Vậy là chúng ta đã đi qua những khái niệm cơ bản
+
+81
+00:03:42.561 --> 00:03:43.935
+nhất về lập trình Python.
+
+82
+00:03:43.935 --> 00:03:47.232
+Hy vọng rằng bài học này đã cung cấp cho bạn một
+
+83
+00:03:47.232 --> 00:03:50.529
+cái nhìn tổng quan về ngôn ngữ này và giúp bạn tự
+
+84
+00:03:50.529 --> 00:03:52.728
+tin hơn trên con đường chinh phục Python.
+
+85
+00:03:52.728 --> 00:03:56.849
+Hãy nhớ rằng. lập trình là một kỹ năng cần được rèn luyện thường xuyên.
+
+86
+00:03:56.849 --> 00:03:59.322
+Đừng ngại thử nghiệm. khám phá và mắc lỗi.
+
+87
+00:03:59.322 --> 00:04:02.895
+Mỗi lỗi sai là một cơ hội để học hỏi và tiến bộ.
+
+88
+00:04:02.895 --> 00:04:06.192
+Để tiếp tục hành trình học Python của mình. tôi khuyến khích
+
+89
+00:04:06.192 --> 00:04:09.489
+bạn tham gia vào các cộng đồng trực tuyến. đọc sách và
+
+90
+00:04:09.489 --> 00:04:12.512
+tài liệu tham khảo. và thực hành viết mã thường xuyên.
+
+91
+00:04:12.512 --> 00:04:15.809
+Có rất nhiều nguồn tài liệu miễn phí và trả phí có
+
+92
+00:04:15.809 --> 00:04:19.107
+sẵn trên internet. từ các khóa học trực tuyến đến các blog
+
+93
+00:04:19.107 --> 00:04:19.931
+và diễn đàn.
+
+94
+00:04:19.931 --> 00:04:23.228
+Hãy tìm kiếm những nguồn tài liệu phù hợp với trình độ
+
+95
+00:04:23.228 --> 00:04:24.602
+và sở thích của bạn.
+
+96
+00:04:24.602 --> 00:04:28.724
+Một trong những cách tốt nhất để học Python là thông qua việc thực hành.
+
+97
+00:04:28.724 --> 00:04:32.021
+Hãy thử giải các bài tập lập trình. xây dựng các dự
+
+98
+00:04:32.021 --> 00:04:35.319
+án nhỏ. và đóng góp vào các dự án mã nguồn mở.
+
+99
+00:04:35.319 --> 00:04:38.616
+Càng thực hành nhiều. bạn càng trở nên thành thạo hơn trong
+
+100
+00:04:38.616 --> 00:04:39.715
+việc sử dụng Python.
+
+101
+00:04:39.715 --> 00:04:43.013
+Cuối cùng. đừng quên rằng lập trình là một quá trình liên
+
+102
+00:04:43.013 --> 00:04:45.211
+tục học hỏi và cập nhật kiến thức.
+
+103
+00:04:45.211 --> 00:04:48.508
+Ngôn ngữ lập trình và công nghệ liên tục phát triển. vì
+
+104
+00:04:48.508 --> 00:04:51.806
+vậy bạn cần phải luôn cập nhật những kiến thức mới nhất.
+
+105
+00:04:51.806 --> 00:04:55.103
+Hãy đọc các bài báo công nghệ. tham gia các hội thảo
+
+106
+00:04:55.103 --> 00:04:58.400
+và workshop. và kết nối với những người có cùng đam mê.
+
+107
+00:04:58.400 --> 00:05:01.698
+Chúc các bạn thành công trên con đường trở thành những lập
+
+108
+00:05:01.698 --> 00:05:03.072
+trình viên Python tài năng!
+
