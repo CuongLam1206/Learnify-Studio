@@ -153,29 +153,19 @@ async def update_job(job_id: str, data: dict):
 
 async def _upload_video(job_id: str, video_path: Path, vtt_path: Path | None) -> str:
     """
-    Upload video lên Cloudflare R2 (nếu setup) hoặc serve qua WORKER_PUBLIC_URL.
+    Upload video lên Cloudflare R2.
     Returns: public URL của video.
+    Raises Exception nếu R2 upload thất bại.
     """
-    # ── Option 1: Upload lên R2 ───────────────────────────────────────────────
-    if _HAS_R2 and os.getenv("R2_ACCOUNT_ID"):
-        import asyncio
-        try:
-            loop = asyncio.get_event_loop()
-            video_url, _ = await loop.run_in_executor(
-                None, lambda: _r2_upload(job_id, video_path, vtt_path)
-            )
-            return video_url
-        except Exception as e:
-            print(f"  [R2] Upload failed, fallback to local: {e}")
+    if not _HAS_R2 or not os.getenv("R2_ACCOUNT_ID"):
+        raise Exception("R2 not configured — set R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY")
 
-    # ── Option 2: Fallback — copy vào public/videos/ và serve qua WORKER_PUBLIC_URL ──
-    public_dir = Path(__file__).parent.parent.parent / "public" / "videos"
-    public_dir.mkdir(parents=True, exist_ok=True)
-    dest = public_dir / f"{job_id}.mp4"
-    shutil.copy2(video_path, dest)
-    if vtt_path and vtt_path.exists():
-        shutil.copy2(vtt_path, public_dir / f"{job_id}.vtt")
-    return f"{WORKER_PUBLIC_URL}/videos/{job_id}.mp4"
+    import asyncio
+    loop = asyncio.get_event_loop()
+    video_url, _ = await loop.run_in_executor(
+        None, lambda: _r2_upload(job_id, video_path, vtt_path)
+    )
+    return video_url
 
 
 async def run_pipeline(req: ProcessRequest):
