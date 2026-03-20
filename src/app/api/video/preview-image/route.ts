@@ -3,10 +3,17 @@ import { NextRequest, NextResponse } from "next/server";
 // ─── Gemini Image Gen ─────────────────────────────────────────────────────────
 async function generateGeminiImage(prompt: string): Promise<string | null> {
     const apiKey = process.env.GEMINI_API_KEY!;
+    if (!apiKey) return null;
+
     const CONFIGS = [
-        { apiVer: "v1beta", model: "gemini-2.0-flash-exp" },
-        { apiVer: "v1beta", model: "gemini-2.0-flash-exp-image-generation" },
+        // Ưu tiên model ảnh nhanh nhất
+        { apiVer: "v1beta", model: "gemini-2.5-flash-image" },
+        // Fallback sang model mới hơn
+        { apiVer: "v1beta", model: "gemini-3.1-flash-image-preview" },
+        // Fallback cuối cùng: model Pro cho ảnh
+        { apiVer: "v1beta", model: "gemini-3-pro-image-preview" },
     ];
+
     for (const { apiVer, model } of CONFIGS) {
         try {
             const res = await fetch(
@@ -16,20 +23,35 @@ async function generateGeminiImage(prompt: string): Promise<string | null> {
                     headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
                     body: JSON.stringify({
                         contents: [{ parts: [{ text: prompt }] }],
-                        generationConfig: { responseModalities: ["TEXT", "IMAGE"] },
+                        generationConfig: { 
+                            responseModalities: ["IMAGE"],
+                            // Một số model Imagen yêu cầu tham số này
+                            candidateCount: 1
+                        },
                     }),
-                    signal: AbortSignal.timeout(35000),
+                    signal: AbortSignal.timeout(45000), // Tăng timeout cho việc tạo ảnh
                 }
             );
-            if (!res.ok) continue;
+
+            if (!res.ok) {
+                console.error(`[ImageGen] Model ${model} failed with status ${res.status}`);
+                continue;
+            }
+
             const data = await res.json();
             const parts = data?.candidates?.[0]?.content?.parts ?? [];
+            
             for (const part of parts) {
                 const b64 = part?.inlineData?.data;
                 const mime = part?.inlineData?.mimeType ?? "image/png";
-                if (b64) return `data:${mime};base64,${b64}`;
+                if (b64) {
+                    console.log(`[ImageGen] ✅ Success with model: ${model}`);
+                    return `data:${mime};base64,${b64}`;
+                }
             }
-        } catch { /* try next */ }
+        } catch (err) {
+            console.error(`[ImageGen] Error with model ${model}:`, err);
+        }
     }
     return null;
 }
