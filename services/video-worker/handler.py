@@ -98,20 +98,16 @@ async def process_video(event_input: dict) -> dict:
         return {"job_id": job_id, "status": "failed", "error": str(e)[:200]}
 
 
-def handler(event):
+async def handler(event):
     """
-    RunPod Serverless entry point.
-    RunPod gọi hàm này với mỗi job.
+    RunPod Serverless entry point (async).
+    RunPod hỗ trợ async handler natively — không cần asyncio.run().
     """
     input_data = event.get("input", {})
     job_id = input_data.get("job_id", "unknown")
     print(f"[RunPod] Received job: {job_id} | tier={input_data.get('tier', 2)}")
 
-    # RunPod handler là sync, nhưng pipeline là async → dùng asyncio.run
-    if sys.platform == "win32":
-        asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-
-    result = asyncio.run(process_video(input_data))
+    result = await process_video(input_data)
     print(f"[RunPod] Job {job_id} complete: {result.get('status')}")
     return result
 

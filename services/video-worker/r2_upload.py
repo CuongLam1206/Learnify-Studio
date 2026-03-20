@@ -20,7 +20,10 @@ def get_r2_client():
         endpoint_url=f"https://{account_id}.r2.cloudflarestorage.com",
         aws_access_key_id=access_key,
         aws_secret_access_key=secret_key,
-        config=Config(signature_version="s3v4"),
+        config=Config(
+            signature_version="s3v4",
+            s3={'addressing_style': 'path'}
+        ),
         region_name="auto",
     )
 
@@ -37,23 +40,56 @@ def upload_to_r2(local_path: Path, key: str) -> str:
     bucket = os.getenv("R2_BUCKET_NAME", "learnify-videos")
     public_url_base = os.getenv("R2_PUBLIC_URL", "")  # e.g. https://pub-xxx.r2.dev
 
-    client = get_r2_client()
-    
-    content_type = "video/mp4"
-    if key.endswith(".vtt"):
-        content_type = "text/vtt"
-    elif key.endswith(".png") or key.endswith(".jpg"):
-        content_type = "image/jpeg"
+    try:
+        client = get_r2_client()
+        
+        content_type = "video/mp4"
+        if key.endswith(".vtt"):
+            content_type = "text/vtt"
+        elif key.endswith(".png") or key.endswith(".jpg"):
+            content_type = "image/jpeg"
 
-    client.upload_file(
-        str(local_path),
-        bucket,
-        key,
-        ExtraArgs={
-            "ContentType": content_type,
-            "CacheControl": "public, max-age=31536000",
-        },
-    )
+        client.upload_file(
+            str(local_path),
+            bucket,
+            key,
+            ExtraArgs={
+                "ContentType": content_type,
+                "CacheControl": "public, max-age=31536000",
+            },
+        )
+    except Exception as e:
+        print(f"  ⚠️ R2 upload first attempt failed: {e}")
+        if "SSL" in str(e):
+            print("  🔄 Retrying R2 upload with verify=False (SSL debug)...")
+            account_id = os.getenv("R2_ACCOUNT_ID", "")
+            access_key  = os.getenv("R2_ACCESS_KEY_ID", "")
+            secret_key  = os.getenv("R2_SECRET_ACCESS_KEY", "")
+            
+            # Fallback client (verify=False)
+            debug_client = boto3.client(
+                "s3",
+                endpoint_url=f"https://{account_id}.r2.cloudflarestorage.com",
+                aws_access_key_id=access_key,
+                aws_secret_access_key=secret_key,
+                config=Config(
+                    signature_version="s3v4",
+                    s3={'addressing_style': 'path'}
+                ),
+                region_name="auto",
+                verify=False
+            )
+            debug_client.upload_file(
+                str(local_path),
+                bucket,
+                key,
+                ExtraArgs={
+                    "ContentType": content_type,
+                    "CacheControl": "public, max-age=31536000",
+                },
+            )
+        else:
+            raise e
 
     if public_url_base:
         return f"{public_url_base.rstrip('/')}/{key}"

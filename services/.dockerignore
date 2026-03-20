@@ -1,0 +1,22 @@
+# Docker build context: E:\Learnify_Studio\services\
+
+# Exclude SadTalker model checkpoints (mount từ Network Volume)
+sadtalker/repo/checkpoints/
+sadtalker/repo/results/
+sadtalker/repo_tmp/
+sadtalker/gfpgan/weights/
+
+# Exclude local Python caches
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/.pytest_cache/
+
+# Exclude local env files
+**/.env
+**/.env.*
+!**/.env.runpod.example
+
+# Exclude video output files
+video-worker/public/videos/
+video-worker/temp*/
