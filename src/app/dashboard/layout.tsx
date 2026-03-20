@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { signOut, useSession } from "next-auth/react";
 import {
     LayoutDashboard, Video, Plus, User,
-    BrainCircuit, BookOpen, LogOut, Building2,
+    BrainCircuit, LogOut, Building2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,7 +12,6 @@ const navItems = [
     { href: "/dashboard", label: "Tổng quan", icon: LayoutDashboard },
     { href: "/dashboard/videos", label: "Video bài giảng", icon: Video },
     { href: "/dashboard/videos/new", label: "Tạo video mới", icon: Plus },
-    { href: "/dashboard/profile", label: "Hồ sơ GV", icon: User },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -73,12 +72,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                             );
                         })}
 
-                        {/* AI Copilot — soon */}
-                        <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm text-slate-400 cursor-not-allowed ml-2">
-                            <BookOpen className="w-4 h-4 flex-shrink-0" />
-                            AI Copilot
-                            <span className="text-[10px] bg-slate-100 text-slate-400 px-1.5 py-0.5 rounded-full">Soon</span>
-                        </div>
 
                         {/* Admin — chỉ hiện cho role admin */}
                         {userRole === "admin" && (
