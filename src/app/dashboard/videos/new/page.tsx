@@ -9,7 +9,7 @@ import {
     Clock, BookOpen, Edit3, Upload, X, FileUp, Plus, Image as ImageIcon
 } from "lucide-react";
 
-import { cn, getTierCostEstimate } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type ScriptSection = {
@@ -741,7 +741,7 @@ function StepTier({
                                 <div className="flex items-center gap-4 text-xs text-gray-400">
                                     <span>🔧 {tier.tech}</span>
                                     <span>📍 {tier.bestFor}</span>
-                                    <span className="text-gray-700 font-medium">💰 {getTierCostEstimate(tier.id, durationMinutes)}</span>
+
                                 </div>
                             </div>
                         </div>
@@ -896,12 +896,7 @@ function StepConfirm({
                     {selectedTier.emoji} {selectedTier.name}
                 </p>
                 <p className="text-gray-500 text-sm">{selectedTier.desc}</p>
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                    <span className="text-gray-500 text-sm">Chi phí ước tính: </span>
-                    <span className="text-brand-600 font-semibold">
-                        {getTierCostEstimate(tier, form.durationMinutes)}
-                    </span>
-                </div>
+
             </div>
 
             <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-xl">
@@ -926,7 +921,7 @@ export default function NewVideoPage() {
     const [form, setForm] = useState({
         subject: "",
         outline: "",
-        durationMinutes: 15,
+        durationMinutes: 5,
         rawContent: "",
     });
     const [uploadedFile, setUploadedFile] = useState<File | null>(null); // File gốc từ upload

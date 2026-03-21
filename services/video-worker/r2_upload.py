@@ -1,54 +1,27 @@
 """
-Cloudflare R2 upload helper (S3-compatible API).
-Requires: pip install boto3
+Cloudflare R2 upload helper — qua Cloudflare Worker proxy.
+
+Docker image RunPod KHÔNG THỂ kết nối TLS tới r2.cloudflarestorage.com.
+Giải pháp: deploy Cloudflare Worker làm proxy upload.
+Worker dùng R2 binding (không qua S3 API) và URL workers.dev (Cloudflare CDN).
 """
 
 import os
-import boto3
-import urllib3
+import httpx
 from pathlib import Path
-from botocore.config import Config
-
-# ── Tắt warning SSL khi dùng verify=False ──────────────────────────────────────
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
-
-def get_r2_client():
-    """Tạo boto3 client cho Cloudflare R2 (SSL disabled để tránh handshake failure)."""
-    account_id = os.getenv("R2_ACCOUNT_ID", "")
-    access_key  = os.getenv("R2_ACCESS_KEY_ID", "")
-    secret_key  = os.getenv("R2_SECRET_ACCESS_KEY", "")
-
-    if not account_id or not access_key or not secret_key:
-        print("  ⚠️ R2 credentials missing! Check R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY")
-        return None
-
-    return boto3.client(
-        "s3",
-        endpoint_url=f"https://{account_id}.r2.cloudflarestorage.com",
-        aws_access_key_id=access_key,
-        aws_secret_access_key=secret_key,
-        config=Config(
-            signature_version="s3v4",
-            s3={'addressing_style': 'path'},
-            retries={'max_attempts': 3, 'mode': 'standard'}
-        ),
-        region_name="auto",
-        verify=False,  # ← Fix SSL handshake failure với R2
-    )
 
 
 def upload_to_r2(local_path: Path, key: str) -> str:
-    """
-    Upload file lên R2.
-    Returns: Public URL của file trên R2, hoặc raise Exception nếu thất bại.
-    """
-    bucket = os.getenv("R2_BUCKET_NAME", "learnify-videos")
+    """Upload file lên R2 qua Cloudflare Worker proxy. Returns: public URL."""
+    worker_url = os.getenv("R2_WORKER_URL", "")
+    upload_secret = os.getenv("R2_UPLOAD_SECRET", "")
     public_url_base = os.getenv("R2_PUBLIC_URL", "")
 
-    client = get_r2_client()
-    if client is None:
-        raise Exception("R2 client could not be created — missing credentials")
+    if not worker_url:
+        raise Exception(
+            "Missing R2_WORKER_URL! "
+            "Deploy Cloudflare Worker and set R2_WORKER_URL=https://your-worker.workers.dev"
+        )
 
     content_type = "video/mp4"
     if key.endswith(".vtt"):
@@ -56,33 +29,44 @@ def upload_to_r2(local_path: Path, key: str) -> str:
     elif key.endswith(".png") or key.endswith(".jpg"):
         content_type = "image/jpeg"
 
-    client.upload_file(
-        str(local_path),
-        bucket,
-        key,
-        ExtraArgs={
-            "ContentType": content_type,
-            "CacheControl": "public, max-age=31536000",
-        },
+    file_data = Path(local_path).read_bytes()
+    file_size_mb = len(file_data) / (1024 * 1024)
+    print(f"  [R2] Uploading {local_path} ({file_size_mb:.1f}MB) → {key}")
+
+    # Upload qua Worker proxy (workers.dev = Cloudflare CDN = accessible)
+    url = f"{worker_url.rstrip('/')}/{key}"
+    print(f"  [R2] PUT {url}")
+
+    headers = {
+        "Content-Type": content_type,
+    }
+    if upload_secret:
+        headers["X-Upload-Key"] = upload_secret
+
+    response = httpx.put(
+        url,
+        content=file_data,
+        headers=headers,
+        timeout=300,
     )
+
+    print(f"  [R2] Response: {response.status_code}")
+
+    if response.status_code not in (200, 201):
+        print(f"  [R2] Error: {response.text[:300]}")
+        raise Exception(f"R2 upload failed HTTP {response.status_code}: {response.text[:200]}")
+
+    print(f"  [R2] ✅ Upload thành công!")
 
     if public_url_base:
         return f"{public_url_base.rstrip('/')}/{key}"
 
-    # Fallback: presigned URL (nếu chưa set public domain)
-    url = client.generate_presigned_url(
-        "get_object",
-        Params={"Bucket": bucket, "Key": key},
-        ExpiresIn=86400 * 7,
-    )
+    # Fallback: return worker URL
     return url
 
 
 def upload_video_and_subtitle(job_id: str, video_path: Path, vtt_path: Path | None = None):
-    """
-    Upload video MP4 + VTT subtitle lên R2.
-    Returns: (video_url, vtt_url_or_None)
-    """
+    """Upload video MP4 + VTT subtitle lên R2 qua Worker proxy."""
     video_key = f"videos/{job_id}.mp4"
     video_url = upload_to_r2(video_path, video_key)
     print(f"  ✅ R2 upload video: {video_url}")
