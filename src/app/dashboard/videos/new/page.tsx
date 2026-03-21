@@ -298,6 +298,27 @@ function StepInput({
 }
 
 // ─── Step 2: Script Editor ────────────────────────────────────────────────────
+
+/** Nén ảnh base64 data URL → JPEG nhỏ hơn (resize + quality) */
+function compressImage(dataUrl: string, maxW = 640, maxH = 480, quality = 0.6): Promise<string> {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement("canvas");
+            let { width, height } = img;
+            if (width > maxW) { height *= maxW / width; width = maxW; }
+            if (height > maxH) { width *= maxH / height; height = maxH; }
+            canvas.width = Math.round(width);
+            canvas.height = Math.round(height);
+            const ctx = canvas.getContext("2d")!;
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL("image/jpeg", quality));
+        };
+        img.onerror = () => resolve(dataUrl); // fallback: trả ảnh gốc nếu lỗi
+        img.src = dataUrl;
+    });
+}
+
 function SlideImagePicker({
     section,
     onChange,
@@ -339,11 +360,12 @@ function SlideImagePicker({
             }),
         })
             .then((r) => r.json())
-            .then((d) => {
+            .then(async (d) => {
                 if (d.success && d.imageDataUrl) {
-                    console.log(`[img] slide="${section.title}" → ✅ OK (${Math.round(d.imageDataUrl.length / 1024)}KB)`);
-                    setAiImage(d.imageDataUrl);
-                    onChange(d.imageDataUrl); // auto-commit → worker dùng ảnh này
+                    const compressed = await compressImage(d.imageDataUrl, 640, 480, 0.6);
+                    console.log(`[img] slide="${section.title}" → ✅ OK (${Math.round(d.imageDataUrl.length / 1024)}KB → ${Math.round(compressed.length / 1024)}KB)`);
+                    setAiImage(compressed);
+                    onChange(compressed);
                 } else {
                     console.error(`[img] slide="${section.title}" → ❌ FAILED`, d.error ?? d);
                 }
@@ -356,11 +378,14 @@ function SlideImagePicker({
     const displayImage = section.customImageBase64 || aiImage;
     const isCustom = !!section.customImageBase64;
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = () => onChange(reader.result as string);
+        reader.onload = async () => {
+            const compressed = await compressImage(reader.result as string, 640, 480, 0.6);
+            onChange(compressed);
+        };
         reader.readAsDataURL(file);
     };
 
@@ -1028,12 +1053,10 @@ export default function NewVideoPage() {
                 body: JSON.stringify({
                     jobId,
                     tier: selectedTier,
-                    // Truyền script xuống worker — BỎ customImageBase64 để tránh
-                    // vượt Vercel 4.5MB body limit. Worker tự gen ảnh bằng Gemini.
+                    // Truyền script có ảnh xuống worker (ảnh đã nén JPEG ở preview)
                     script_override: {
                         ...script,
                         imageEngine,
-                        sections: script.sections.map(({ customImageBase64: _, ...s }) => s),
                     },
                     // Tier 1 SadTalker: gửi ảnh GV (base64 strip prefix) và avatar intro text
                     instructor_photo_base64: selectedTier === 1 && instructorPhoto
