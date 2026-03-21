@@ -1028,10 +1028,12 @@ export default function NewVideoPage() {
                 body: JSON.stringify({
                     jobId,
                     tier: selectedTier,
-                    // Truyền thẳng script có ảnh xuống worker, không qua DB
+                    // Truyền script xuống worker — BỎ customImageBase64 để tránh
+                    // vượt Vercel 4.5MB body limit. Worker tự gen ảnh bằng Gemini.
                     script_override: {
                         ...script,
                         imageEngine,
+                        sections: script.sections.map(({ customImageBase64: _, ...s }) => s),
                     },
                     // Tier 1 SadTalker: gửi ảnh GV (base64 strip prefix) và avatar intro text
                     instructor_photo_base64: selectedTier === 1 && instructorPhoto

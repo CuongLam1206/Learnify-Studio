@@ -7,7 +7,7 @@ playwright==1.50.0
 python-dotenv==1.0.1
 gtts==2.5.3
 aiofiles==24.1.0
-edge-tts==7.0.2
+edge-tts>=7.2.7
 
 # RunPod Serverless SDK
 runpod>=1.6.0
