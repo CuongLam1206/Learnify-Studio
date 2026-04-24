@@ -1,6 +1,6 @@
 # 🎓 Learnify Agent — AI Video Lecture Generator
 
-Xem các video được tạo tại:https://learnify-studio.vercel.app/. Đăng nhập để xem:TK:admin@learnify.vn MK:Abc123456.
+Xem các video được tạo tại: https://learnify-studio.vercel.app/. Đăng nhập để xem:TK:admin@learnify.vn MK:Abc123456.
 
 Lưu ý: Không thể tạo thêm video do Runpod đã tắt. Có thể xem video được tạo Tab video bài giảng
 
