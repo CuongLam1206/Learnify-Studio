@@ -1,5 +1,6 @@
 # 🎓 Learnify Agent — AI Video Lecture Generator
-
+Xem các video được tạo tại:https://learnify-studio.vercel.app/. Đăng nhập để xem:TK:admin@learnify.vn MK:Abc123456.
+Lưu ý: Không thể tạo thêm video do Runpod đã tắt. Có thể xem video được tạo Tab video bài giảnh
 Nền tảng tạo video bài giảng AI tự động từ đề cương môn học. Ba tầng chất lượng: **Tier 1** — Talking Avatar (SadTalker, tự host miễn phí), **Tier 2** — Slide + TTS, **Tier 3** — Animation.
 
 ---
